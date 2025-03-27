@@ -9,7 +9,7 @@ void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsig
   sprintf(recieve_data_buffer, "%s", recieve_data);
 
   if(strncmp(recieve_data_buffer, "HELLO", 5) == 0) {
-    ring();
+    ring_famima ();
   }
 }
 
@@ -37,7 +37,7 @@ void loop() {
   esp_now_register_recv_cb(esp_now_callback);  
 }
 
-void ring(void) {
+void ring_famima(void) {
   tone(SPK, 369, 300);
   delay(300);
   tone(SPK, 293, 300);
