@@ -9,7 +9,7 @@ void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsig
   sprintf(recieve_data_buffer, "%s", recieve_data);
 
   if(strncmp(recieve_data_buffer, "HELLO", 5) == 0) {
-    ring_famima ();
+    ring_skype();
   }
 }
 
@@ -35,6 +35,22 @@ void loop() {
   }
 
   esp_now_register_recv_cb(esp_now_callback);  
+}
+
+void ring_skype(void) {
+  tone(SPK, 311, 400);
+  delay(400);
+  tone(SPK, 466, 400);
+  delay(400);
+  tone(SPK, 311, 800);
+  delay(1200);
+
+  tone(SPK, 466, 450);
+  delay(450);
+  tone(SPK, 294, 250);
+  delay(250);
+  tone(SPK, 466, 800);
+  delay(1200);
 }
 
 void ring_famima(void) {
