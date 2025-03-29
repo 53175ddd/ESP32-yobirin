@@ -1,7 +1,27 @@
 #include <WiFi.h>
 #include <esp_now.h>
 
+#define BAUDRATE 115200
+
 #define SPK 14  // スピーカが繋がるピンの番号
+
+typedef struct {
+  uint16_t note;
+  uint16_t tone_period;
+  uint16_t mute_period;
+} score_t;
+
+score_t skype[] = {{311, 400, 0}, {466, 400, 0}, {311, 800, 400}, {466, 450, 0}, {294, 250, 0}, {466, 800, 400}};
+score_t famima[] = {{369, 300, 0}, {293, 300, 0}, {220, 300, 0}, {293, 300, 0}, {329, 300, 0}, {440, 600, 0}, {220, 300, 0}, {329, 300, 0}, {369, 300, 0}, {329, 300, 0}, {220, 300, 0}, {293, 600, 1400}};
+score_t machinami_haruka[] = {{1109, 200, 0}, {880, 200, 0}, {1109, 400, 0}, {1661, 400, 0}, {1480, 600, 0}, {1976, 180, 20}, {1976, 600, 0}, {1760, 200, 0}, {1661, 200, 0}, {1480, 200, 0}, {1319, 200, 0}, {1245, 200, 0}, {1760, 400, 0}, {1661, 400, 0}, {1480, 200, 0}, {1319, 200, 0}, {1245, 200, 0}, {1480, 200, 0}, {1319, 1200, 800}};
+
+void ring(score_t score[], int32_t count) {
+  for(size_t i = 0; i < count; i++) {
+    tone(SPK, score[i].note, score[i].tone_period);
+    delay(score[i].tone_period);
+    delay(score[i].mute_period);
+  }
+}
 
 void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsigned char *recieve_data, int length) {
   char recieve_data_buffer[length];  // 受信データ格納用
@@ -9,16 +29,18 @@ void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsig
   sprintf(recieve_data_buffer, "%s", recieve_data);
 
   if(strncmp(recieve_data_buffer, "HELLO", 5) == 0) {
-    ring_skype();
+    ring(skype, (sizeof(skype) / sizeof(score_t)));
   }
 }
 
 void setup() {
-  pinMode(SPK, OUTPUT);
-  setToneChannel(SPK); 
-}
+  Serial.begin(BAUDRATE);
 
-void loop() {
+  delay(100);
+
+  pinMode(SPK, OUTPUT);
+  setToneChannel(SPK);
+
   WiFi.mode(WIFI_STA); 
 
   if(esp_now_init() == ESP_OK){
@@ -34,48 +56,8 @@ void loop() {
     }
   }
 
-  esp_now_register_recv_cb(esp_now_callback);  
+  esp_now_register_recv_cb(esp_now_callback);
 }
 
-void ring_skype(void) {
-  tone(SPK, 311, 400);
-  delay(400);
-  tone(SPK, 466, 400);
-  delay(400);
-  tone(SPK, 311, 800);
-  delay(1200);
-
-  tone(SPK, 466, 450);
-  delay(450);
-  tone(SPK, 294, 250);
-  delay(250);
-  tone(SPK, 466, 800);
-  delay(1200);
-}
-
-void ring_famima(void) {
-  tone(SPK, 369, 300);
-  delay(300);
-  tone(SPK, 293, 300);
-  delay(300);
-  tone(SPK, 220, 300);
-  delay(300);
-  tone(SPK, 293, 300);
-  delay(300);
-  tone(SPK, 329, 300);
-  delay(300);
-  tone(SPK, 440, 600);
-  delay(600);
-  tone(SPK, 220, 300);
-  delay(300);
-  tone(SPK, 329, 300);
-  delay(300);
-  tone(SPK, 369, 300);
-  delay(300);
-  tone(SPK, 329, 300);
-  delay(300);
-  tone(SPK, 220, 300);
-  delay(300);
-  tone(SPK, 293, 600);
-  delay(2000);
+void loop() {
 }
