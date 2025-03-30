@@ -33,8 +33,6 @@ void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsig
   sprintf(recieve_data_buffer, "%s", recieve_data);
 
   if(strncmp(recieve_data_buffer, "HELLO", 5) == 0) {
-    send_message("START", 6);
-
     ring(machinami_haruka, (sizeof(machinami_haruka) / sizeof(score_t)));
 
     send_message("END", 4);

@@ -17,10 +17,6 @@ void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsig
 
   sprintf(recieve_data_buffer, "%s", recieve_data);
 
-  if(strncmp(recieve_data_buffer, "START", 5) == 0) {
-    digitalWrite(LED_BUILTIN, HIGH);
-  }
-
   if(strncmp(recieve_data_buffer, "END", 3) == 0) {
     digitalWrite(LED_BUILTIN,  LOW);
   }
@@ -66,6 +62,7 @@ void loop() {
   pin = (pin << 1) + (digitalRead(SW) == HIGH ? 0 : 1);
 
   if((pin & 0b00000111) == 0b001) {
+    digitalWrite(LED_BUILTIN, HIGH);
     send_cmd();
   } 
 }
