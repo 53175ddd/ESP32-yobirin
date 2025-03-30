@@ -5,6 +5,10 @@
 
 #define SPK 14  // スピーカが繋がるピンの番号
 
+uint8_t target[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+esp_now_peer_info_t peer_info;
+
 typedef struct {
   uint16_t note;
   uint16_t tone_period;
@@ -29,7 +33,11 @@ void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsig
   sprintf(recieve_data_buffer, "%s", recieve_data);
 
   if(strncmp(recieve_data_buffer, "HELLO", 5) == 0) {
-    ring(skype, (sizeof(skype) / sizeof(score_t)));
+    send_message("START", 6);
+
+    ring(machinami_haruka, (sizeof(machinami_haruka) / sizeof(score_t)));
+
+    send_message("END", 4);
   }
 }
 
@@ -56,8 +64,22 @@ void setup() {
     }
   }
 
+  memcpy(peer_info.peer_addr, target, 6);
+  peer_info.channel = 0;      // Wi-Fi のチャンネル選択  
+  peer_info.encrypt = false;  // 暗号化の有無
+
+  if(esp_now_add_peer(&peer_info) == ESP_OK) {
+    Serial.println("Successed to add peer");
+  }else {
+    Serial.println("Faild to add peer");
+  }
+
   esp_now_register_recv_cb(esp_now_callback);
 }
 
 void loop() {
+}
+
+void send_message(char msg[], int8_t count) {
+  esp_now_send(target, (uint8_t *)msg, count);
 }

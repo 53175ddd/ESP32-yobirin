@@ -6,16 +6,22 @@
 #define LED_BUILTIN 5  // 送信成功すると光るやつ
 #define SW          4  // 信号送るトリガースイッチ
 
-uint8_t target[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};  // 使ってない
+uint8_t target[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 char cmd[] = "HELLO";  // この文字列を送ると起動する
 
 esp_now_peer_info_t peer_info;
 
-void esp_now_callback(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  if(status == ESP_NOW_SEND_SUCCESS) {
+void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsigned char *recieve_data, int length) {
+  char recieve_data_buffer[length];  // 受信データ格納用
+
+  sprintf(recieve_data_buffer, "%s", recieve_data);
+
+  if(strncmp(recieve_data_buffer, "START", 5) == 0) {
     digitalWrite(LED_BUILTIN, HIGH);
-    delay(250);
+  }
+
+  if(strncmp(recieve_data_buffer, "END", 3) == 0) {
     digitalWrite(LED_BUILTIN,  LOW);
   }
 }
@@ -51,7 +57,7 @@ void setup() {
     Serial.println("Faild to add peer");
   }
 
-  esp_now_register_send_cb(esp_now_callback);
+  esp_now_register_recv_cb(esp_now_callback);
 }
 
 void loop() {
