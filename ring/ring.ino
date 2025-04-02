@@ -1,3 +1,5 @@
+#include <sound.h>
+
 #include <WiFi.h>
 #include <esp_now.h>
 
@@ -5,27 +7,18 @@
 
 #define SPK 14  // スピーカが繋がるピンの番号
 
+#define CONCERT_PITCH 440.0f
+
+sound music(CONCERT_PITCH);
+
 uint8_t target[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 esp_now_peer_info_t peer_info;
 
-typedef struct {
-  uint16_t note;
-  uint16_t tone_period;
-  uint16_t mute_period;
-} score_t;
-
-score_t skype[] = {{311, 400, 0}, {466, 400, 0}, {311, 800, 400}, {466, 450, 0}, {294, 250, 0}, {466, 800, 400}};
-score_t famima[] = {{369, 300, 0}, {293, 300, 0}, {220, 300, 0}, {293, 300, 0}, {329, 300, 0}, {440, 600, 0}, {220, 300, 0}, {329, 300, 0}, {369, 300, 0}, {329, 300, 0}, {220, 300, 0}, {293, 600, 1400}};
-score_t machinami_haruka[] = {{1109, 200, 0}, {880, 200, 0}, {1109, 400, 0}, {1661, 400, 0}, {1480, 600, 0}, {1976, 180, 20}, {1976, 600, 0}, {1760, 200, 0}, {1661, 200, 0}, {1480, 200, 0}, {1319, 200, 0}, {1245, 200, 0}, {1760, 400, 0}, {1661, 400, 0}, {1480, 200, 0}, {1319, 200, 0}, {1245, 200, 0}, {1480, 200, 0}, {1319, 1200, 800}};
-
-void ring(score_t score[], int32_t count) {
-  for(size_t i = 0; i < count; i++) {
-    tone(SPK, score[i].note, score[i].tone_period);
-    delay(score[i].tone_period);
-    delay(score[i].mute_period);
-  }
-}
+score_t skype[] = {{Ds4, DOTTED_EIGHTH_NOTE, 0}, {As4, DOTTED_EIGHTH_NOTE, 0}, {Ds4, QUARTER_NOTE, QUARTER_NOTE + EIGHTH_NOTE}, {As4, QUARTER_NOTE, 0}, {D4, EIGHTH_NOTE, 0}, {As4, QUARTER_NOTE, DOTTED_EIGHTH_NOTE}, {Ds4, DOTTED_EIGHTH_NOTE, 0}, {As4, DOTTED_EIGHTH_NOTE, 0}, {Ds4, QUARTER_NOTE, QUARTER_NOTE + EIGHTH_NOTE}, {As4, QUARTER_NOTE, 0}, {D4, EIGHTH_NOTE, 0}, {As4, QUARTER_NOTE, EIGHTH_NOTE}};
+score_t famima[] = {{Fs4, EIGHTH_NOTE, 0}, {D4, EIGHTH_NOTE, 0}, {A3, EIGHTH_NOTE, 0}, {D4, EIGHTH_NOTE, 0}, {E4, EIGHTH_NOTE, 0}, {A4, QUARTER_NOTE, 0}, {A3, EIGHTH_NOTE, 0}, {E4, EIGHTH_NOTE, 0}, {Fs4, EIGHTH_NOTE, 0}, {E4, EIGHTH_NOTE, 0}, {A3, EIGHTH_NOTE, 0}, {D4, QUARTER_NOTE, DOTTED_HALF_NOTE}};
+score_t machinami_haruka[] = {{Cs5, QUARTER_NOTE, 0}, {A4, QUARTER_NOTE, 0}, {Cs5, HALF_NOTE, 0}, {Gs5, HALF_NOTE, 0}, {Fs5, DOTTED_HALF_NOTE, 0}, {B5, QUARTER_NOTE - 10, 10}, {B5, DOTTED_HALF_NOTE, 0}, {A5, QUARTER_NOTE, 0}, {Gs5, QUARTER_NOTE, 0}, {Fs5, QUARTER_NOTE, 0}, {E5, QUARTER_NOTE, 0}, {Ds5, QUARTER_NOTE, 0}, {A5, HALF_NOTE, 0}, {Gs5, HALF_NOTE, 0}, {Fs5, QUARTER_NOTE, 0}, {E5, QUARTER_NOTE, 0}, {Ds5, QUARTER_NOTE, 0}, {Fs5, QUARTER_NOTE, 0}, {E5, WHOLE_NOTE, WHOLE_NOTE}};
+score_t yumewokakeru[] = {{Df5, EIGHTH_NOTE - 10, 10}, {Df5, EIGHTH_NOTE - 10, 10}, {Df5, EIGHTH_NOTE, 0}, {Gf5, EIGHTH_NOTE - 10, 10}, {Gf5, EIGHTH_NOTE, 0}, {Af5, EIGHTH_NOTE, 0}, {Gf5, EIGHTH_NOTE, 0}, {Df6, DOTTED_QUARTER_NOTE, 0}, {Gf5, EIGHTH_NOTE - 10, 10}, {Gf5, QUARTER_NOTE, EIGHTH_NOTE}, {Df5, EIGHTH_NOTE, 0}, {Df5, EIGHTH_NOTE, 0}, {Gf5, QUARTER_NOTE, 0}, {Af5, EIGHTH_NOTE, 0}, {Af5, EIGHTH_NOTE, 0}, {Bf5, QUARTER_NOTE - 10, 10}, {Bf5, EIGHTH_NOTE, EIGHTH_NOTE}, {Bf5, QUARTER_NOTE, 0}, {Af5, EIGHTH_NOTE, 0}, {G5, EIGHTH_NOTE, 0}, {G5, EIGHTH_NOTE, 0}, {Af5, QUARTER_NOTE, 0}, {B5, EIGHTH_NOTE, EIGHTH_NOTE}, {D5, EIGHTH_NOTE - 10, 10}, {D5, EIGHTH_NOTE - 10, 10}, {D5, EIGHTH_NOTE, 0}, {Gf5, EIGHTH_NOTE - 10, 10}, {Gf5, EIGHTH_NOTE, 0}, {Af5, EIGHTH_NOTE, 0}, {Gf5, EIGHTH_NOTE, 0}, {Df6, DOTTED_QUARTER_NOTE, 0}, {Gf5, EIGHTH_NOTE - 10, 10}, {Gf5, QUARTER_NOTE, EIGHTH_NOTE}, {Ef5, EIGHTH_NOTE, 0}, {B5, EIGHTH_NOTE, 0}, {Bf5, QUARTER_NOTE, 0}, {Af5, EIGHTH_NOTE, 0}, {Af5, EIGHTH_NOTE, 0}, {Bf5, QUARTER_NOTE - 10, 10}, {Af5, DOTTED_QUARTER_NOTE, 0}, {Gf5, EIGHTH_NOTE - 10, 10}, {Gf5, QUARTER_NOTE, QUARTER_NOTE}};
 
 void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsigned char *recieve_data, int length) {
   char recieve_data_buffer[length];  // 受信データ格納用
@@ -33,7 +26,10 @@ void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsig
   sprintf(recieve_data_buffer, "%s", recieve_data);
 
   if(strncmp(recieve_data_buffer, "HELLO", 5) == 0) {
-    ring(machinami_haruka, (sizeof(machinami_haruka) / sizeof(score_t)));
+    // music.play(skype, (sizeof(skype) / sizeof(score_t)), 120);
+    // music.play(famima, (sizeof(famima) / sizeof(score_t)), 120);
+    music.play(machinami_haruka, (sizeof(machinami_haruka) / sizeof(score_t)), 320);
+    // music.play(yumewokakeru, (sizeof(yumewokakeru) / sizeof(score_t)), 195);
 
     send_message("END", 4);
   }
@@ -46,6 +42,10 @@ void setup() {
 
   pinMode(SPK, OUTPUT);
   setToneChannel(SPK);
+
+  music.set_speaker_out(SPK);
+  music.generate();
+  music.debug_table();
 
   WiFi.mode(WIFI_STA); 
 
