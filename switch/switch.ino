@@ -8,16 +8,16 @@
 
 uint8_t target[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-char cmd[] = "HELLO";  // この文字列を送ると起動する
+char cmd[] = "HELLO\0";  // この文字列を送ると起動する
 
 esp_now_peer_info_t peer_info;
 
 void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsigned char *recieve_data, int length) {
-  char recieve_data_buffer[length];  // 受信データ格納用
+  char recieve_data_buffer[length + 1];  // 受信データ格納用
 
-  sprintf(recieve_data_buffer, "%s", recieve_data);
+  sprintf(recieve_data_buffer, "%s\0", recieve_data);
 
-  if(strncmp(recieve_data_buffer, "END", 3) == 0) {
+  if(strncmp(recieve_data_buffer, "END\0", 4) == 0) {
     digitalWrite(LED_BUILTIN,  LOW);
   }
 }

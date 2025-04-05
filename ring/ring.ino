@@ -23,12 +23,13 @@ score_t twilight[] = {{Gs5, DOTTED_QUARTER_NOTE - 10, 10}, {Gs5, EIGHTH_NOTE, 0}
 score_t atos[] = {{E2, EIGHTH_NOTE, 0}, {A2, EIGHTH_NOTE, 0}, {E3, EIGHTH_NOTE, 0}, {B3, EIGHTH_NOTE, 0}, {E4, EIGHTH_NOTE, 0}, {A4, EIGHTH_NOTE, 0}, {Gs4, HALF_NOTE, HALF_NOTE}};
 score_t ode_to_joy[] = {{C5, QUARTER_NOTE - 10, 10}, {C5, QUARTER_NOTE, 0}, {Cs5, QUARTER_NOTE, 0}, {Ds5, QUARTER_NOTE - 10, 10}, {Ds5, QUARTER_NOTE, 0}, {Cs5, QUARTER_NOTE, 0}, {C5, QUARTER_NOTE, 0}, {As4, QUARTER_NOTE, 0}, {Gs4, QUARTER_NOTE - 10, 10}, {Gs4, QUARTER_NOTE, 0}, {As4, QUARTER_NOTE, 0}, {C5, QUARTER_NOTE - 10, 10}, {C5, DOTTED_QUARTER_NOTE, 0}, {As4, EIGHTH_NOTE - 10, 10}, {As4, HALF_NOTE, 0}, {C5, QUARTER_NOTE - 10, 10}, {C5, QUARTER_NOTE, 0}, {Cs5, QUARTER_NOTE, 0}, {Ds5, QUARTER_NOTE - 10, 10}, {Ds5, QUARTER_NOTE, 0}, {Cs5, QUARTER_NOTE, 0}, {C5, QUARTER_NOTE, 0}, {As4, QUARTER_NOTE, 0}, {Gs4, QUARTER_NOTE - 10, 10}, {Gs4, QUARTER_NOTE, 0}, {As4, QUARTER_NOTE, 0}, {C5, QUARTER_NOTE, 0}, {As4, DOTTED_QUARTER_NOTE, 0}, {Gs4, EIGHTH_NOTE - 10, 10}, {Gs4, HALF_NOTE, 0}, {As4, QUARTER_NOTE - 10, 10}, {As4, QUARTER_NOTE, 0}, {C5, QUARTER_NOTE, 0}, {Gs4, QUARTER_NOTE, 0}, {As4, QUARTER_NOTE, 0}, {C5, EIGHTH_NOTE, 0}, {Cs5, EIGHTH_NOTE, 0}, {C5, QUARTER_NOTE, 0}, {Gs4, QUARTER_NOTE, 0}, {As4, QUARTER_NOTE, 0}, {C5, EIGHTH_NOTE, 0}, {Cs5, EIGHTH_NOTE, 0}, {C5, QUARTER_NOTE, 0}, {Gs4, QUARTER_NOTE, 0}, {Gs4, QUARTER_NOTE, 0}, {As4, QUARTER_NOTE, 0}, {Ds4, QUARTER_NOTE, 0}, {C5, HALF_NOTE - 10, 10}, {C5, QUARTER_NOTE, 0}, {Cs5, QUARTER_NOTE, 0}, {Ds5, QUARTER_NOTE - 10, 10}, {Ds5, QUARTER_NOTE, 0}, {Cs5, QUARTER_NOTE, 0}, {C5, QUARTER_NOTE, 0}, {Cs5, EIGHTH_NOTE, 0}, {As4, EIGHTH_NOTE, 0}, {Gs4, QUARTER_NOTE - 10, 10}, {Gs4, QUARTER_NOTE, 0}, {As4, QUARTER_NOTE, 0}, {C5, QUARTER_NOTE, 0}, {As4, DOTTED_QUARTER_NOTE, 0}, {Gs4, EIGHTH_NOTE - 10, 10}, {Gs4, DOTTED_HALF_NOTE, DOTTED_HALF_NOTE}};
 
+
 void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsigned char *recieve_data, int length) {
-  char recieve_data_buffer[length];  // 受信データ格納用
+  char recieve_data_buffer[length + 1];  // 受信データ格納用
 
-  sprintf(recieve_data_buffer, "%s", recieve_data);
+  sprintf(recieve_data_buffer, "%s\0", recieve_data);
 
-  if(strncmp(recieve_data_buffer, "HELLO", 5) == 0) {
+  if(strncmp(recieve_data_buffer, "HELLO\0", 6) == 0) {
     // music.play(skype, (sizeof(skype) / sizeof(score_t)), 120);
     // music.play(famima, (sizeof(famima) / sizeof(score_t)), 120);
     music.play(machinami_haruka, (sizeof(machinami_haruka) / sizeof(score_t)), 320);
@@ -37,7 +38,7 @@ void esp_now_callback(const esp_now_recv_info *esp_now_recieve_info, const unsig
     // music.play(atos, (sizeof(atos) / sizeof(score_t)), 141);
     // music.play(ode_to_joy, (sizeof(ode_to_joy) / sizeof(score_t)), 124);
 
-    send_message("END", 4);
+    send_message("END\0", 4);
   }
 }
 
