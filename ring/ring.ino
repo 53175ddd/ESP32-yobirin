@@ -62,12 +62,7 @@ void setup() {
   }else {
     Serial.println("Error initializing ESP-NOW");
 
-    while(true) {
-      digitalWrite(LED_BUILTIN, HIGH);
-      delay(50);
-      digitalWrite(LED_BUILTIN,  LOW);
-      delay(50);
-    }
+    while(true);
   }
 
   memcpy(peer_info.peer_addr, target, 6);
