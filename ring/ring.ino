@@ -79,7 +79,8 @@ void setup() {
     Serial.println("Faild to add peer");
   }
 
-  music.play(atos, (sizeof(atos) / sizeof(score_t)), 141);
+  // music.play(atos, (sizeof(atos) / sizeof(score_t)), 141);
+  // music.play(one_up, (sizeof(one_up) / sizeof(score_t)), 1000);
 
   esp_now_register_recv_cb(esp_now_callback);
 }
